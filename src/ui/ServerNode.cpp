@@ -98,6 +98,11 @@ bool ServerNode::init(CCSize size, ServerListLayer *list, int index) {
         this,
         menu_selector(ServerNode::onDelete)
     );
+    if (m_server.id == GDPSMain::get()->currentServer()) {
+        deleteBtn->setEnabled(false);
+        deleteSpr->setColor(ccGRAY);
+        xSpr->setColor(ccGRAY);
+    }
     deleteBtn->setID("delete-btn");
 
     auto upSpr = CCSprite::create("GJ_button_05.png");
@@ -246,6 +251,16 @@ void ServerNode::onEdit(CCObject *sender) {
 
 void ServerNode::onDelete(CCObject *sender) {
     if (m_locked) return;
+
+    if (m_listLayer->m_selectedServer == m_server.id) {
+        return MDPopup::create(
+            "Nope!",
+            "This code is unreachable! That means I can break Geode index rules and no one will know!"
+            "FUCK PENIS CUNT COCK BITCH ASS WHORE!! Wait, you didnt get this code to run did you?", // heh
+            "OK"
+        )->show();
+    }
+
     createQuickPopup(
         "Delete Server",
         fmt::format("Are you sure you want to delete {}? This will delete your save data for the server.", m_server.name),
@@ -258,14 +273,6 @@ void ServerNode::onDelete(CCObject *sender) {
 
             if (!res) {
                 MDPopup::create("Error!", res.unwrapErr(), "OK")->show();
-            }
-
-            if (m_listLayer->m_selectedServer == m_server.id) {
-                m_listLayer->m_selectedServer = -2;
-                Mod::get()->setSavedValue("current", -2);
-                main->m_shouldSaveGameData = false;
-            } else {
-                main->m_shouldSaveGameData = true;
             }
 
             m_listLayer->updateList();

@@ -2,7 +2,8 @@
 ### Internal changes
 - <cb>Internal refactors</c>
 - <cg>Update Geode SDK to 4.7.0</c>
-- <cr>Removed ability to overwrite save directories.</c>
+- <cr>Removed ability to overwrite save directories already in use.</c>
+- <cr>Removed ability to delete server already in use. You must now switch to another one before deleting.</c>
 # 1.4.7
 ### Emergency bugfix
 - <cy>Fixed empty save directory putting files in root dir.</c>

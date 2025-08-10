@@ -20,6 +20,8 @@ class GDPSMain {
         geode::Result<> deleteServer(GDPSTypes::Server& server);
         static bool isBase(std::string url);
 
+        int currentServer() const;
+
         void save() const;
 
         static GDPSMain *get();

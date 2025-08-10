@@ -9,6 +9,8 @@
 
 using namespace geode::prelude;
 
+GDPSMain* GDPSMain::m_instance = nullptr;
+
 bool GDPSMain::isActive() const {
     if (!m_issues.empty())
         return false;
@@ -88,6 +90,10 @@ geode::Result<> GDPSMain::modifyRegisteredServer(GDPSTypes::Server& server) {
 }
 
 geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
+    if (server.id == m_currentServer) {
+        return geode::Err("Attempting to delete server currently in use.");
+    }
+
     m_shouldSaveGameData = false;
 
     std::filesystem::path serverPath = geode::dirs::getSaveDir() / "gdpses" / server.saveDir;
@@ -122,12 +128,11 @@ geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
     }
 
     m_servers.erase(server.id);
+    m_shouldSaveGameData = true;
     this->save();
 
     return geode::Ok();
 }
-
-GDPSMain *GDPSMain::m_instance = nullptr;
 
 void GDPSMain::init() {
     m_servers =
@@ -153,6 +158,10 @@ GDPSMain *GDPSMain::get() {
         m_instance->init();
     }
     return m_instance;
+}
+
+int GDPSMain::currentServer() const {
+    return m_currentServer;
 }
 
 bool GDPSMain::isBase() const {
