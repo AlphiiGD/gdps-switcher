@@ -38,6 +38,79 @@ void GDPSMain::save() const {
     Mod::get()->setSavedValue<std::map<int, GDPSTypes::Server>>("servers", servers);
 }
 
+[[nodiscard]] geode::Result<> GDPSMain::setServerSaveDir(GDPSTypes::Server& server, std::string_view saveDir) {
+    if (saveDir.empty()) {
+        return geode::Err("Cannot make save directory empty.");
+    }
+
+    if (server.saveDir == saveDir) {
+        log::warn("Attempted to set server save directory to itself.");
+        return geode::Ok();
+    }
+
+    auto newSaveDirPath = Mod::get()->getSaveDir() / "gdpses" / saveDir;
+    auto oldSaveDirPath = Mod::get()->getSaveDir() / "gdpses" / server.saveDir;
+
+    std::error_code err;
+    bool newDirExists = std::filesystem::exists(newSaveDirPath, err);
+    if (newDirExists) {
+        return geode::Err("Save directory {} already exists!", newSaveDirPath);
+    }
+    if (err) {
+        return geode::Err("Error checking exitence of save directory {}: {}", newSaveDirPath, err.message());
+    }
+
+    auto gdpsesDir = Mod::get()->getSaveDir() / "gdpses";
+    auto canonicalNewSaveDirPath = std::filesystem::canonical(newSaveDirPath, err);
+    if (err) {
+        return geode::Err("Error getting canonical path for save directory {}: {}", newSaveDirPath, err.message());
+    }
+
+    if (!canonicalNewSaveDirPath.string().starts_with(gdpsesDir.string())
+        || std::filesystem::equivalent(newSaveDirPath, gdpsesDir)
+    ) {
+        return geode::Err("Save directory already exists and cannot be overwritten.");
+    }
+
+    std::filesystem::rename(geode::dirs::getSaveDir() / "gdpses" / server.saveDir, saveDir);
+    server.saveDir = saveDir;
+
+    return geode::Ok();
+}
+
+geode::Result<> GDPSMain::setServerInfo(int id, std::string_view name = "", std::string_view url = "", std::string_view saveDir = "") {
+    auto it = m_servers.find(id);
+    if (it == m_servers.end()) {
+        return geode::Err("Server not found.");
+    }
+
+    m_shouldSaveGameData = false;
+    auto& server = it->second;
+
+    auto res = setServerSaveDir(server, saveDir); // This function handles empty strings for us.
+    if (!res) {
+        return geode::Err(res.unwrapErr());
+    }
+
+    if (!name.empty()) {
+        server.name = name;
+    }
+
+    if (!url.empty()) {
+        server.url = url;
+    }
+
+    if (m_currentServer == id) {
+        ServerAPIEvents::updateServer(m_serverApiId, server.url);
+    }
+
+    server.infoLoaded = false; // To force the fetch to work after we change the URL.
+    ServerInfoManager::get()->fetch(server);
+    m_shouldSaveGameData = true;
+    this->save();
+    return geode::Ok();
+}
+
 geode::Result<> GDPSMain::registerServer(GDPSTypes::Server& server) {
     if (m_servers.contains(server.id)) {
         return geode::Err("Server registery already contains this ID.\nContact developers for help.");
@@ -47,6 +120,7 @@ geode::Result<> GDPSMain::registerServer(GDPSTypes::Server& server) {
         server.saveDir = fmt::format("{}", server.id);
     }
 
+    m_servers[server.id] = server;
     ServerInfoManager::get()->fetch(server);
     return geode::Ok();
 }
@@ -90,6 +164,7 @@ geode::Result<> GDPSMain::modifyRegisteredServer(GDPSTypes::Server& server) {
 }
 
 geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
+    // This should only be hit if some GDPSUtils bs happens.
     if (server.id == m_currentServer) {
         return geode::Err("Attempting to delete server currently in use.");
     }
@@ -132,6 +207,27 @@ geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
     this->save();
 
     return geode::Ok();
+}
+
+geode::Result<> GDPSMain::deleteServer(int id) {
+    auto it = m_servers.find(id);
+    if (it == m_servers.end()) {
+        return geode::Err("Server does not exist!");
+    }
+    return deleteServer(it->second);
+}
+
+geode::Result<> GDPSMain::switchServer(int id) {
+    if (!serverExists(id)) {
+        return geode::Err("Server does not exist!");
+    }
+
+    m_currentServer = id;
+    return geode::Ok();
+}
+
+bool GDPSMain::serverExists(int id) const {
+    return m_servers.find(id) != m_servers.end();
 }
 
 void GDPSMain::init() {

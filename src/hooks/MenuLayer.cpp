@@ -21,7 +21,10 @@ class $modify(GDPSML, MenuLayer) {
 				this,
 				menu_selector(GDPSML::onGDPS)
 			);
-			if (!btn) return true;
+			if (!btn) {
+                spr->removeFromParent();
+                return true;
+            }
 			btn->setID("gdps-switcher"_spr);
 			menu->addChild(btn);
 			menu->updateLayout();
