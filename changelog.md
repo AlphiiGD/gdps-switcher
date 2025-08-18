@@ -2,6 +2,7 @@
 ### Internal changes
 - <cb>Internal refactors</c>
 - <cg>Update Geode SDK to 4.7.0</c>
+- <cy>Fixed crashing on launch related to file name encoding.</c>
 - <cr>Removed ability to overwrite save directories already in use.</c>
 - <cr>Removed ability to delete server already in use. You must now switch to another one before deleting.</c>
 # 1.4.7

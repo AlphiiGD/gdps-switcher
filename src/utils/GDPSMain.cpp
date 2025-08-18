@@ -66,7 +66,7 @@ void GDPSMain::save() const {
         return geode::Err("Error getting canonical path for save directory {}: {}", newSaveDirPath, err.message());
     }
 
-    if (!canonicalNewSaveDirPath.string().starts_with(gdpsesDir.string())
+    if (!geode::utils::string::pathToString(canonicalNewSaveDirPath).starts_with(geode::utils::string::pathToString(gdpsesDir))
         || std::filesystem::equivalent(newSaveDirPath, gdpsesDir)
     ) {
         return geode::Err("Save directory already exists and cannot be overwritten.");
@@ -78,7 +78,7 @@ void GDPSMain::save() const {
     return geode::Ok();
 }
 
-geode::Result<> GDPSMain::setServerInfo(int id, std::string_view name = "", std::string_view url = "", std::string_view saveDir = "") {
+geode::Result<> GDPSMain::setServerInfo(int id, std::string_view name, std::string_view url, std::string_view saveDir) {
     auto it = m_servers.find(id);
     if (it == m_servers.end()) {
         return geode::Err("Server not found.");
@@ -102,6 +102,7 @@ geode::Result<> GDPSMain::setServerInfo(int id, std::string_view name = "", std:
 
     if (m_currentServer == id) {
         ServerAPIEvents::updateServer(m_serverApiId, server.url);
+        GSGManager::updateFileNames();
     }
 
     server.infoLoaded = false; // To force the fetch to work after we change the URL.
@@ -187,7 +188,10 @@ geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
         return geode::Err("Failed to get canonical path for {}: {}", serverPath, err.message());
     }
 
-    if (!canonicalServerPath.string().starts_with(gdpsesDir.string()) || serverPath != gdpsesDir) {
+    if (
+        !geode::utils::string::pathToString(canonicalServerPath).starts_with(geode::utils::string::pathToString(gdpsesDir))
+        || serverPath != gdpsesDir
+    ) {
         return geode::Err(
             "Attempted to delete a path outside or equal to the gdpses directory: {}\n\n"
             "To prevent unintentional extra data loss, your save was not deleted - "

@@ -6,11 +6,13 @@
 #include <string>
 
 class GDPSMain {
+    friend class GSGManager;
     protected:
         static GDPSMain *m_instance;
         std::vector<std::string> m_issues = {};
         void init();
         [[nodiscard]] geode::Result<> setServerSaveDir(GDPSTypes::Server& server, std::string_view saveDir); // Caller is responsible for managing save state.
+        friend GDPSTypes::Server& getCurrentServer();
     public:
         bool isActive() const;
         void registerIssue(const std::string& issue);

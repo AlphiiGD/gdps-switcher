@@ -65,7 +65,7 @@ void MigrationManager::migrateData() {
     for (const auto& entry : std::filesystem::directory_iterator(savePath)) {
         if (!entry.is_regular_file()) continue;
 
-        auto fname = entry.path().filename().string();
+        auto fname = geode::utils::string::pathToString(entry.path().filename());
         if ((fname.starts_with("CCGameManager-") || fname.starts_with("CCLocalLevels-")) && fname.ends_with(".dat")) {
             auto start = fname.find('-') + 1;
             auto end = fname.rfind(".dat");

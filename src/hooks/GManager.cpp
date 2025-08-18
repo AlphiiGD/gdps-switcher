@@ -25,15 +25,15 @@ void GSGManager::setup() {
     if (!std::filesystem::exists(dir, err)) {
         if (err) {
             main->registerIssue(fmt::format("Failed to check if directory exists: {}", err.message()));
-            return log::error("Failed to check directory '{}', data will not save: {}", dir.string(), err.message());
+            return log::error("Failed to check directory '{}', data will not save: {}", geode::utils::string::pathToString(dir), err.message());
         }
         if (!std::filesystem::create_directory(dir, err)) {
             main->registerIssue(fmt::format("Failed to setup save file: {}", err.message()));
-            return log::error("Failed to create directory '{}', data will not save: {}", dir.string(), err.message());
+            return log::error("Failed to create directory '{}', data will not save: {}", geode::utils::string::pathToString(dir), err.message());
         }
         if (err) {
             main->registerIssue(fmt::format("Error after creating directory: {}", err.message()));
-            return log::error("Error after creating directory '{}', data will not save: {}", dir.string(), err.message());
+            return log::error("Error after creating directory '{}', data will not save: {}", geode::utils::string::pathToString(dir), err.message());
         }
     }
     m_fileName = fmt::format("{}/{}/{}", gdpsesPath, server.saveDir, m_fileName);
@@ -55,17 +55,17 @@ void GSGManager::updateFileNames() {
         if (!std::filesystem::exists(dir, err)) {
             if (err) {
                 main->registerIssue(fmt::format("Failed to check if directory exists: {}", err.message()));
-                log::error("Failed to check directory '{}', data will not save: {}", dir.string(), err.message());
+                log::error("Failed to check directory '{}', data will not save: {}", geode::utils::string::pathToString(dir), err.message());
                 continue;
             }
             if (!std::filesystem::create_directory(dir, err)) {
                 main->registerIssue(fmt::format("Failed to create directory: {}", err.message()));
-                log::error("Failed to create directory '{}', data will not save: {}", dir.string(), err.message());
+                log::error("Failed to create directory '{}', data will not save: {}", geode::utils::string::pathToString(dir), err.message());
                 continue;
             }
             if (err) {
                 main->registerIssue(fmt::format("Error after creating directory: {}", err.message()));
-                log::error("Error after creating directory '{}', data will not save: {}", dir.string(), err.message());
+                log::error("Error after creating directory '{}', data will not save: {}", geode::utils::string::pathToString(dir), err.message());
                 continue;
             }
         }
