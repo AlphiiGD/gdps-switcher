@@ -255,8 +255,7 @@ void ServerNode::onDelete(CCObject *sender) {
     if (m_listLayer->m_selectedServer == m_server.id) {
         return MDPopup::create(
             "Nope!",
-            "This code is unreachable! That means I can break Geode index rules and no one will know!"
-            "FUCK PENIS CUNT COCK BITCH ASS WHORE!! Wait, you didnt get this code to run did you?", // heh
+            "Lindings.",
             "OK"
         )->show();
     }
