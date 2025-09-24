@@ -1,12 +1,12 @@
 {
-	"geode": "4.7.0",
+	"geode": "4.8.0",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
 		"mac": "2.2074",
 		"ios": "2.2074"
 	},
-	"version": "1.4.9",
+	"version": "1.4.10",
 	"id": "km7dev.gdps-switcher",
 	"name": "GDPS Switcher",
 	"developers": ["km7dev", "Alphii"],
