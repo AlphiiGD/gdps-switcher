@@ -17,13 +17,11 @@
 	],
 	"early-load": true,
 	"links": {
-		"source": "https://github.com/kingminer7/gdps-switcher",
-		"community": "https://discord.gg/Vj5Mcennph",
-		"homepage": "https://km7dev.tech"
+		"source": "https://github.com/AlphiiGD/gdps-switcher"
 	},
 	"issues": {
-		"info": "Report issues in my Discord server.",
-		"url": "https://discord.gg/Vj5Mcennph"
+		"info": "Report issues on GitHub.",
+		"url": "https://github.com/AlphiiGD/gdps-switcher/issues"
 	},
 	"resources": {
 		"spritesheets": {
