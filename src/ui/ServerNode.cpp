@@ -5,7 +5,7 @@
 
 #include <Geode/ui/LazySprite.hpp>
 
-bool ServerNode::init(CCSize size, ServerListLayer *list, int index) {
+bool ServerNode::init(CCSize size, ServerListLayer* list, int index) {
     if (!CCNode::init()) return false;
     m_index = index;
 
@@ -21,14 +21,14 @@ bool ServerNode::init(CCSize size, ServerListLayer *list, int index) {
 
     ccColor4B color;
     if (Mod::get()->getSavedValue("ss-rainbow", false)) {
-	switch(index % 6) {
-	    case 0: color = ccc4(228, 3, 3, 150); break;
-	    case 1: color = ccc4(255, 140, 0, 150); break;
-	    case 2: color = ccc4(255, 237, 0, 150); break;
-	    case 3: color = ccc4(0, 128, 38, 150); break;
-	    case 4: color = ccc4(0, 77, 255, 150); break;
-	    case 5: color = ccc4(117, 7, 135, 150); break;
-	}
+	    switch(index % 6) {
+	        case 0: color = ccc4(228, 3, 3, 150); break;
+	        case 1: color = ccc4(255, 140, 0, 150); break;
+	        case 2: color = ccc4(255, 237, 0, 150); break;
+	        case 3: color = ccc4(0, 128, 38, 150); break;
+	        case 4: color = ccc4(0, 77, 255, 150); break;
+	        case 5: color = ccc4(117, 7, 135, 150); break;
+	    }
     } else {
         color = index % 2 == 0 ? ccColor4B{0, 0, 0, 60} : ccColor4B{0, 0, 0, 30};
     }
@@ -103,7 +103,7 @@ bool ServerNode::init(CCSize size, ServerListLayer *list, int index) {
         deleteSpr->setColor(ccGRAY);
         xSpr->setColor(ccGRAY);
     }
-    deleteBtn->setID("delete-btn");
+    deleteBtn->setID("delete-btn"_spr);
 
     auto upSpr = CCSprite::create("GJ_button_05.png");
     upSpr->setScale(0.5475f);
@@ -143,7 +143,7 @@ bool ServerNode::init(CCSize size, ServerListLayer *list, int index) {
     return true;
 };
 
-ServerNode *ServerNode::create(GDPSTypes::Server& server, CCSize size, ServerListLayer *list, int index) {
+ServerNode* ServerNode::create(GDPSTypes::Server& server, CCSize size, ServerListLayer* list, int index) {
     auto ret = new ServerNode(server);
     if (ret && ret->init(size, list, index)) {
         ret->autorelease();
@@ -153,7 +153,7 @@ ServerNode *ServerNode::create(GDPSTypes::Server& server, CCSize size, ServerLis
     return nullptr;
 }
 
-void ServerNode::onSelect(CCObject *sender) {
+void ServerNode::onSelect(CCObject* sender) {
     m_listLayer->onSelect(m_server);
 }
 
@@ -204,7 +204,7 @@ void ServerNode::updateInfo() {
         icon->removeFromParent();
     }
 
-    CCSprite *icon;
+    CCSprite* icon;
 
     if (m_server.iconIsSprite) {
         icon = CCSprite::createWithSpriteFrameName(m_server.icon.c_str());
@@ -244,12 +244,12 @@ GDPSTypes::Server& ServerNode::getServer() {
     return m_server;
 }
 
-void ServerNode::onEdit(CCObject *sender) {
+void ServerNode::onEdit(CCObject* sender) {
     if (m_locked) return;
     ModifyServerPopup::create(m_server, m_listLayer)->show();
 }
 
-void ServerNode::onDelete(CCObject *sender) {
+void ServerNode::onDelete(CCObject* sender) {
     if (m_locked) return;
 
     if (m_listLayer->m_selectedServer == m_server.id) {
@@ -299,7 +299,7 @@ bool ServerNode::isEditing() {
     return m_editing;
 }
 
-void ServerNode::onMove(CCObject *sender) {
+void ServerNode::onMove(CCObject* sender) {
     if (m_locked) return;
     auto btn = static_cast<CCMenuItemSpriteExtra *>(sender);
     if (!btn) return;

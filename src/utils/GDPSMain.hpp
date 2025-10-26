@@ -1,23 +1,27 @@
 #pragma once
 
 #include "Types.hpp"
+#include <km7dev.server_api/include/ServerAPIEvents.hpp>
 
 #include <vector>
 #include <string>
+#include <mutex>
+#include <shared_mutex>
 
 class GDPSMain {
     friend class GSGManager;
     protected:
+        geode::EventListener<EventFilter<UpdateServerEvent>> m_serverChangeListener;
         static GDPSMain *m_instance;
         std::vector<std::string> m_issues = {};
         void init();
         [[nodiscard]] geode::Result<> setServerSaveDir(GDPSTypes::Server& server, std::string_view saveDir); // Caller is responsible for managing save state.
-        friend GDPSTypes::Server& getCurrentServer();
     public:
         bool isActive() const;
         void registerIssue(const std::string& issue);
         std::vector<std::string> getIssues();
         bool isBase() const;
+        geode::Result<GDPSTypes::Server> getCurrentServer();
         geode::Result<> setServerInfo(int id, std::string_view name = "", std::string_view url = "", std::string_view saveDir = "");
         geode::Result<> registerServer(GDPSTypes::Server& server);
         geode::Result<> modifyRegisteredServer(GDPSTypes::Server& server);
@@ -25,6 +29,7 @@ class GDPSMain {
         geode::Result<> deleteServer(int id);
         geode::Result<> switchServer(int id);
         bool serverExists(int id) const;
+        bool shouldSaveGameData() const;
         static bool isBase(std::string url);
 
         int currentServer() const;

@@ -1,8 +1,6 @@
 #include "GDPSMain.hpp"
 #include "Types.hpp"
 
-#include <km7dev.server_api/include/ServerAPIEvents.hpp>
-
 #include <Geode/Geode.hpp>
 #include "ServerInfoManager.hpp"
 #include "../hooks/GManager.hpp"
@@ -78,12 +76,21 @@ void GDPSMain::save() const {
     return geode::Ok();
 }
 
+geode::Result<GDPSTypes::Server> GDPSMain::getCurrentServer() {
+    // If this ever happens I will kill myself.
+    if (!m_servers.contains(m_currentServer)) {
+        return geode::Err("Current server not found");
+    }
+    return geode::Ok(m_servers[m_currentServer]);
+}
+
 geode::Result<> GDPSMain::setServerInfo(int id, std::string_view name, std::string_view url, std::string_view saveDir) {
     auto it = m_servers.find(id);
     if (it == m_servers.end()) {
         return geode::Err("Server not found.");
     }
 
+    bool shouldRestore = m_shouldSaveGameData;
     m_shouldSaveGameData = false;
     auto& server = it->second;
 
@@ -107,7 +114,7 @@ geode::Result<> GDPSMain::setServerInfo(int id, std::string_view name, std::stri
 
     server.infoLoaded = false; // To force the fetch to work after we change the URL.
     ServerInfoManager::get()->fetch(server);
-    m_shouldSaveGameData = true;
+    m_shouldSaveGameData = shouldRestore;
     this->save();
     return geode::Ok();
 }
@@ -170,6 +177,7 @@ geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
         return geode::Err("Attempting to delete server currently in use.");
     }
 
+    bool shouldRestore = m_shouldSaveGameData;
     m_shouldSaveGameData = false;
 
     std::filesystem::path serverPath = geode::dirs::getSaveDir() / "gdpses" / server.saveDir;
@@ -207,7 +215,7 @@ geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
     }
 
     m_servers.erase(server.id);
-    m_shouldSaveGameData = true;
+    m_shouldSaveGameData = shouldRestore;
     this->save();
 
     return geode::Ok();
@@ -248,16 +256,30 @@ void GDPSMain::init() {
     m_servers[-2] = base;
     const auto &server = m_servers[m_currentServer];
     if (m_currentServer >= 0 && isActive()) {
+        log::info("Loading into GDPS: {}", server.url);
         m_serverApiId = ServerAPIEvents::registerServer(server.url, -40).id;
     }
+
+    m_serverChangeListener.bind([this](UpdateServerEvent* e) -> geode::ListenerResult {
+        if (e->m_id != m_serverApiId) {
+            m_shouldSaveGameData = false;
+        } else {
+            m_shouldSaveGameData = true;
+        }
+        return geode::ListenerResult::Propagate;
+    });
 }
 
-GDPSMain *GDPSMain::get() {
+GDPSMain* GDPSMain::get() {
     if (!m_instance) {
         m_instance = new GDPSMain;
         m_instance->init();
     }
     return m_instance;
+}
+
+bool GDPSMain::shouldSaveGameData() const {
+    return m_shouldSaveGameData;
 }
 
 int GDPSMain::currentServer() const {

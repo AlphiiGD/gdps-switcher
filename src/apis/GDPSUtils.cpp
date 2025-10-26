@@ -31,12 +31,9 @@ Result<std::map<int, GDPSTypes::Server>> GDPSUtils::getServers() {
     return Ok(GDPSMain::get()->m_servers);
 }
 
+// This gets a Server by copy and not by modifiable reference but I don't know if that is intentional.
 Result<GDPSTypes::Server> GDPSUtils::getCurrentServer() {
-    auto it = GDPSMain::get()->m_servers.find(GDPSMain::get()->m_currentServer);
-    if (it == GDPSMain::get()->m_servers.end()) {
-        return Err("Current server not found");
-    }
-    return Ok(it->second);
+    return GDPSMain::get()->getCurrentServer();
 }
 
 Result<bool> GDPSUtils::setCurrentServer(int id) {
@@ -67,11 +64,10 @@ Result<bool> GDPSUtils::deleteServer(int id) {
 }
 
 Result<bool> GDPSUtils::switchServer(int id) {
-    auto it = GDPSMain::get()->m_servers.find(id);
-    if (it == GDPSMain::get()->m_servers.end()) {
-        return Err("Server not found");
+    auto res = GDPSMain::get()->switchServer(id);
+    if (!res) {
+        return Err(res.unwrapErr());
     }
-    GDPSMain::get()->m_currentServer = id;
     return Ok(true);
 }
 

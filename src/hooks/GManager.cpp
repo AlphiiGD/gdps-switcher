@@ -41,7 +41,7 @@ void GSGManager::setup() {
 }
 
 void GSGManager::save() {
-    if (GDPSMain::get()->m_shouldSaveGameData) GManager::save();
+    if (GDPSMain::get()->shouldSaveGameData()) GManager::save();
 }
 
 void GSGManager::updateFileNames() {
