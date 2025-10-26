@@ -152,10 +152,15 @@ geode::Result<> GDPSMain::modifyRegisteredServer(GDPSTypes::Server& server) {
             return geode::Err(fmt::format("Save directory \"{}\" already exists!", path));
         }
         if (errCode) {
-            return geode::Err("Error checking validity of save directory!");
+	    return geode::Err("Error checking validity of save directory: {}", errCode.message());
         }
 
-        std::filesystem::rename(geode::dirs::getSaveDir() / "gdpses" / m_servers[server.id].saveDir, path);
+	log::info("{}", geode::dirs::getSaveDir() / "gdpses" / m_servers  [server.id].saveDir);
+
+        std::filesystem::rename(geode::dirs::getSaveDir() / "gdpses" / m_servers[server.id].saveDir, path, errCode);
+	if (errCode) {
+	    return geode::Err("Error moving save directory: {}", errCode.message());
+        }
     }
 
     m_servers[server.id].name = server.name;
@@ -198,7 +203,7 @@ geode::Result<> GDPSMain::deleteServer(GDPSTypes::Server& server) {
 
     if (
         !geode::utils::string::pathToString(canonicalServerPath).starts_with(geode::utils::string::pathToString(gdpsesDir))
-        || serverPath != gdpsesDir
+        || serverPath == gdpsesDir
     ) {
         return geode::Err(
             "Attempted to delete a path outside or equal to the gdpses directory: {}\n\n"
