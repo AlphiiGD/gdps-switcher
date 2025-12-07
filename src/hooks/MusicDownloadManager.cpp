@@ -28,6 +28,6 @@ class $modify(GDPSMDL, MusicDownloadManager) {
 
     std::string getGDPSPath(const std::filesystem::path& orig) {
         auto server = GDPSMain::get()->m_servers[GDPSMain::get()->m_currentServer];
-        return string::pathToString(orig / "gdpses" / server.saveDir / "");
+        return string::pathToString(dirs::getSaveDir() / "gdpses" / server.saveDir / "");
     }
 };
