@@ -1,3 +1,10 @@
+# 1.4.11
+### Sound effect separation
+- <cy>Separate sound effects per server</c>
+
+# 1.4.10
+### Some bugfixes
+- <cy>Fix some bugs with save deletion</c>
 # 1.4.9
 - <cy>Bugfix.</c>
 # 1.4.8
