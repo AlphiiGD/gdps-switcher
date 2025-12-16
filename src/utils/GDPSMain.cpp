@@ -244,18 +244,18 @@ geode::Result<> GDPSMain::switchServer(int id) {
     return geode::Ok();
 }
 
-GDPSTypes::ServerSerializeInvalidity GDPSMain::isValidServer(const GDPSTypes::Server& server) const {
+GDPSTypes::ServerInvalidity GDPSMain::isValidServer(const GDPSTypes::Server& server) const {
     using namespace GDPSTypes;
-    auto validity = ServerSerializeInvalidity::Valid;
+    ServerInvalidity validity = ServerInvalidity::Valid;
     // Regex is scary!
     static std::basic_regex urlRegex = std::regex("(http|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])");
 
     if (server.name.empty())
-        validity |= ServerSerializeInvalidity::NameEmpty;
+        validity |= ServerInvalidity::NameEmpty;
     if (server.url.empty())
-        validity |= ServerSerializeInvalidity::UrlEmpty;
+        validity |= ServerInvalidity::UrlEmpty;
     else if (!std::regex_match(server.url, urlRegex))
-        validity |= ServerSerializeInvalidity::UrlInvalid;
+        validity |= ServerInvalidity::UrlInvalid;
 
     return validity;
 }
