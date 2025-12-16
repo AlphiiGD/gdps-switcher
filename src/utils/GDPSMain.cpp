@@ -4,6 +4,7 @@
 #include <Geode/Geode.hpp>
 #include "ServerInfoManager.hpp"
 #include "../hooks/GManager.hpp"
+#include <regex>
 
 using namespace geode::prelude;
 
@@ -152,14 +153,14 @@ geode::Result<> GDPSMain::modifyRegisteredServer(GDPSTypes::Server& server) {
             return geode::Err(fmt::format("Save directory \"{}\" already exists!", path));
         }
         if (errCode) {
-	    return geode::Err("Error checking validity of save directory: {}", errCode.message());
+	        return geode::Err("Error checking validity of save directory: {}", errCode.message());
         }
 
-	log::info("{}", geode::dirs::getSaveDir() / "gdpses" / m_servers  [server.id].saveDir);
+	    log::info("{}", geode::dirs::getSaveDir() / "gdpses" / m_servers  [server.id].saveDir);
 
         std::filesystem::rename(geode::dirs::getSaveDir() / "gdpses" / m_servers[server.id].saveDir, path, errCode);
-	if (errCode) {
-	    return geode::Err("Error moving save directory: {}", errCode.message());
+	    if (errCode) {
+	        return geode::Err("Error moving save directory: {}", errCode.message());
         }
     }
 
@@ -241,6 +242,22 @@ geode::Result<> GDPSMain::switchServer(int id) {
 
     m_currentServer = id;
     return geode::Ok();
+}
+
+GDPSTypes::ServerSerializeInvalidity GDPSMain::isValidServer(const GDPSTypes::Server& server) const {
+    using namespace GDPSTypes;
+    auto validity = ServerSerializeInvalidity::Valid;
+    // Regex is scary!
+    static std::basic_regex urlRegex = std::regex("(http|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])");
+
+    if (server.name.empty())
+        validity |= ServerSerializeInvalidity::NameEmpty;
+    if (server.url.empty())
+        validity |= ServerSerializeInvalidity::UrlEmpty;
+    else if (!std::regex_match(server.url, urlRegex))
+        validity |= ServerSerializeInvalidity::UrlInvalid;
+
+    return validity;
 }
 
 bool GDPSMain::serverExists(int id) const {

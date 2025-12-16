@@ -28,6 +28,7 @@ class GDPSMain {
         geode::Result<> deleteServer(GDPSTypes::Server& server);
         geode::Result<> deleteServer(int id);
         geode::Result<> switchServer(int id);
+        bool isValidServer(const GDPSTypes::Server& server); // Will check if server info can be saved to disk.
         bool serverExists(int id) const;
         bool shouldSaveGameData() const;
         static bool isBase(std::string url);

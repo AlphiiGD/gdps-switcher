@@ -8,6 +8,64 @@
 
 namespace GDPSTypes {
 
+    // Issues regarding using server information, such as an invalid URL
+    // or an invalid directory for saving info to disk.
+    struct ServerInvalidity {
+        enum _Invalidity : uint16_t {
+            Valid       = 0u,
+            UrlEmpty    = 1u << 0,
+            NameEmpty   = 1u << 1,
+            UrlInvalid  = 1u << 2,
+            NameInvalid = 1u << 3,
+            DirInvalid  = 1u << 4,
+            IDInvalid   = 1u << 5 // Pretty much just for when ID == -1
+        }; using I = _Invalidity;
+
+        I value;
+
+        ServerInvalidity(uint16_t val) : value(static_cast<ServerInvalidity::I>(val)) {}
+        ServerInvalidity(ServerInvalidity::I val) : value(val) {}
+
+        operator I() {
+            return value;
+        }
+
+        // Returns true if value != Valid, may not be the right design.
+        operator bool() {
+            return static_cast<bool>(value);
+        }
+
+        ServerInvalidity operator|(I rhs) {
+            return ServerInvalidity(
+                static_cast<uint16_t>(value) | static_cast<uint16_t>(rhs)
+            );
+        }
+
+        ServerInvalidity operator&(I rhs) {
+            return ServerInvalidity(
+                static_cast<uint16_t>(value) & static_cast<uint16_t>(rhs)
+            );
+        }
+
+        bool operator==(I rhs) {
+            return static_cast<uint16_t>(value) == static_cast<uint16_t>(rhs);
+        }
+
+        bool operator!=(I rhs) {
+            return static_cast<uint16_t>(value) != static_cast<uint16_t>(rhs);
+        }
+
+        ServerInvalidity& operator|=(I rhs) {
+            value = *this | rhs;
+            return *this;
+        }
+
+        ServerInvalidity& operator&=(I rhs) {
+            value = *this & rhs;
+            return *this;
+        }
+    };
+
     struct Server {
         int id = -1;
         std::string name;

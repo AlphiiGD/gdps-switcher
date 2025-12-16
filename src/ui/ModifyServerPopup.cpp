@@ -95,22 +95,23 @@ ModifyServerPopup *ModifyServerPopup::create(GDPSTypes::Server server, ServerLis
 }
 
 void ModifyServerPopup::checkValidity() {
-    // Regex is scary!
-    static std::basic_regex urlRegex = std::regex("(http|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])");
-    bool valid = true;
-    
-    if (!m_server.url.empty()) {
-        if (!std::regex_match(m_server.url, urlRegex)){
-            m_urlInput->getInputNode()->setLabelNormalColor({255,100,100});
-            valid = false;
-        } else {
-            m_urlInput->getInputNode()->setLabelNormalColor({255,255,255});
-        }
+    auto serverValidity = GDPSMain::get()->isValidServer(m_server);
+    constexpr ccColor3B invalidColor = {255, 100, 100};
+    constexpr ccColor3B validColor   = {255, 255, 255};
+
+    if (serverValidity & GDPSTypes::ServerInvalidity::UrlInvalid) {
+        m_urlInput->getInputNode()->setLabelNormalColor(invalidColor);
+    } else {
+        m_urlInput->getInputNode()->setLabelNormalColor(validColor);
     }
-    if (m_server.name.empty() || m_server.url.empty()) {
-        valid = false;
+
+    if (serverValidity & GDPSTypes::ServerInvalidity::NameInvalid) {
+        m_nameInput->getInputNode()->setLabelNormalColor(invalidColor);
+    } else {
+        m_nameInput->getInputNode()->setLabelNormalColor(validColor);
     }
-    if (valid) {
+
+    if (serverValidity == GDPSTypes::ServerInvalidity::Valid) {
         m_saveBtn->setEnabled(true);
         auto spr = static_cast<CCSprite*>(m_saveBtn->getNormalImage());
         spr->setCascadeColorEnabled(true);
