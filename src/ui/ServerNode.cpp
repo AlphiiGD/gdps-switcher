@@ -236,10 +236,10 @@ void ServerNode::updateInfo() {
         auto ls = LazySprite::create({m_obContentSize.height - 12.5f, m_obContentSize.height - 12.5f}, true);
         ls->setAutoResize(true);
         ls->setScale(1.f);
-        ls->setLoadCallback([this, &icon, ls](Result<> status) {
+        ls->setLoadCallback([this, ls](Result<> status) {
             if (status.isErr()) {
                 ls->removeFromParent();
-                icon = CCSpriteGrayscale::createWithSpriteFrameName("gdlogo.png"_spr);
+                CCSprite* icon = CCSpriteGrayscale::createWithSpriteFrameName("gdlogo.png"_spr);
                 icon->setScale((getContentHeight() - 12.5f) / icon->getContentHeight());
                 icon->setID("icon");
                 this->addChildAtPosition(icon, Anchor::Left, {m_obContentSize.height / 2 + 2.5f, 0});
